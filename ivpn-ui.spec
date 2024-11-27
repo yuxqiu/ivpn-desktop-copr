@@ -18,23 +18,23 @@ IVPN is a secure VPN focused on privacy. This package provides the desktop UI.
 %autosetup -n ivpn
 
 %install
-%__install -d %{buildroot}/opt/%{name}/ui
+%__install -d %{buildroot}/opt/ivpn/ui
 %__install -d %{buildroot}%{_datadir}/applications
-%__install -d %{buildroot}%{_sysconfdir}/opt/%{name}
+%__install -d %{buildroot}%{_sysconfdir}/opt/ivpn
 
 # Install the compiled UI to the proper locations
-mkdir -p %{buildroot}/opt/%{name}/ui/bin
-%__cp -fr ui/bin %{buildroot}/opt/%{name}/ui/bin
+mkdir -p %{buildroot}/opt/ivpn/ui/bin
+%__cp -fr ui/bin/* %{buildroot}/opt/ivpn/ui/bin
 
 %__install -D ui/IVPN.desktop %{buildroot}%{_datadir}/applications/IVPN.desktop
-%__install -D ui/IVPN.desktop %{buildroot}/opt/%{name}/ui/IVPN.desktop
-%__install -D ui/ivpnicon.svg %{buildroot}/opt/%{name}/ui/ivpnicon.svg
+%__install -D ui/IVPN.desktop %{buildroot}/opt/ivpn/ui/IVPN.desktop
+%__install -D ui/ivpnicon.svg %{buildroot}/opt/ivpn/ui/ivpnicon.svg
 
 %files
-/opt/%{name}/ui/bin/*
+/opt/ivpn/ui/bin/*
 %{_datadir}/applications/IVPN.desktop
-/opt/%{name}/ui/IVPN.desktop
-/opt/%{name}/ui/ivpnicon.svg
+/opt/ivpn/ui/IVPN.desktop
+/opt/ivpn/ui/ivpnicon.svg
 
 %changelog
 * Wed Nov 27 2024 ArchitektApx <architektapx@gehinors.ch> - 3.14.29

@@ -58,7 +58,7 @@ fi
 %__install -D -m 0600 etc/servers.json %{buildroot}/opt/%{name}/etc/servers.json
 %__install -D -m 0400 etc/ca.crt %{buildroot}/opt/%{name}/etc/ca.crt
 %__install -D -m 0400 etc/ta.key %{buildroot}/opt/%{name}/etc/ta.key
-%__install -D -m 0400 etc/dnscrypt-proxy.toml %{buildroot}/opt/%{name}/etc/dnscrypt-proxy.toml
+%__install -D -m 0400 etc/dnscrypt-proxy-template.toml %{buildroot}/opt/%{name}/etc/dnscrypt-proxy-template.toml
 
 # Required tools
 %__install -D -m 0755 wireguard-tools/wg-quick %{buildroot}/opt/%{name}/wireguard-tools/wg-quick
@@ -99,7 +99,7 @@ fi
 %attr(-, root, root) /opt/%{name}/etc/servers.json
 %attr(-, root, root) /opt/%{name}/etc/ca.crt
 %attr(-, root, root) /opt/%{name}/etc/ta.key
-%attr(-, root, root) /opt/%{name}/etc/dnscrypt-proxy.toml
+%attr(-, root, root) /opt/%{name}/etc/dnscrypt-proxy-template.toml
 %attr(-, root, root) /opt/%{name}/wireguard-tools/wg-quick
 %attr(-, root, root) /opt/%{name}/wireguard-tools/wg
 %attr(-, root, root) /opt/%{name}/obfsproxy/obfs4proxy
