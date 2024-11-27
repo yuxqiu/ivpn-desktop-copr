@@ -1,7 +1,7 @@
 %global         debug_package %{nil}
 
 Name:           ivpn-ui
-Version:        3.14.17
+Version:            3.14.29
 Release:        1%{?dist}
 Summary:        IVPN - Secure VPN for Privacy (CLI)
 
@@ -37,3 +37,5 @@ mkdir -p %{buildroot}/opt/%{name}/ui/bin
 /opt/%{name}/ui/ivpnicon.svg
 
 %changelog
+* Wed Nov 27 2024 ArchitektApx <architektapx@gehinors.ch> - 3.14.29
+- Update to upstream release v3.14.29 from https://github.com/ivpn/desktop-app/releases/tag/v3.14.29
