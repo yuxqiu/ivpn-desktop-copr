@@ -1,0 +1,121 @@
+name: Sync Upstream and Build Release
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: buildjet-8vcpu-ubuntu-2204-arm
+    steps:
+      - name : Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git bot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  
+      - name: Update desktop submodule to new version tag
+        run: |
+          echo "IVPN Version requested: $IVPN_VER"
+          cd desktop-app
+          git fetch --tags
+          git checkout $IVPN_VER
+          cd ..
+          git add desktop-app
+
+      - name: Setup Go
+        uses: buildjet/setup-go@v5
+        with:
+          go-version: "1.21"
+          cache: true
+          cache-dependency-path: |
+            **/go.mod
+            **/go.sum
+  
+      - name: Setup Node.js
+        uses: buildjet/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+          cache-dependency-path: |
+            desktop-app/ui/package.json
+            desktop-app/ui/package-lock.json
+
+      - name: Install Apt dependencies
+        run: |
+          sudo apt update -yq
+          sudo apt-get install -yqq libiw-dev gcc libssl-dev unzip xsltproc doxygen graphviz valgrind ruby ruby-dev astyle cmake ninja-build
+
+      - name: Setup Python
+        uses: buildjet/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Fpm
+        run: |
+          sudo gem install dotenv && sudo gem install fpm
+
+      - name: Build CLI
+        run: | 
+          cd desktop-app/cli/References/Linux
+          # flush GITHUB_ACTIONS to bypass checks in build.sh
+          GITHUB_ACTIONS= ./build.sh -v $(cat ../../../ui/package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g')
+
+      - name: Build UI
+        run: |
+          cd desktop-app/ui/References/Linux
+          # flush GITHUB_ACTIONS to bypass checks in build.sh
+          GITHUB_ACTIONS= ./build.sh -v $(cat ../../package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g')
+    
+      - name: Package for release 
+        run: | 
+          mkdir -p ivpn
+          mkdir -p ivpn/etc
+          cp desktop-app/deamon/common/etc/ca.crt ivpn/etc/
+          cp desktop-app/daemon/References/Linux/etc/client.down ivpn/etc/
+          cp desktop-app/daemon/References/Linux/etc/client.up ivpn/etc/
+          cp desktop-app/daemon/References/common/etc/dnscrypt-proxy-template.toml ivpn/etc/
+          cp desktop-app/daemon/References/Linux/etc/firewall.sh ivpn/etc/
+          cp desktop-app/daemon/References/common/etc/servers.json ivpn/etc/
+          cp desktop-app/daemon/References/Linux/etc/splittun.sh ivpn/etc/
+          cp desktop-app/daemon/References/common/etc/ta.key ivpn/etc/
+
+          mkdir -p ivpn/dnscrypt-proxy
+          cp desktop-app/daemon/References/Linux/_deps/dnscryptproxy_inst/dnscrypt-proxy ivpn/dnscrypt-proxy/
+          mkdir -p ivpn/kem
+          cp desktop-app/daemon/References/Linux/_deps/kem-helper/kem-helper-bin/kem-helper ivpn/kem/
+          mkdir -p ivpn/obfsproxy
+          cp desktop-app/daemon/References/Linux/_deps/obfs4proxy_inst/obfs4proxy ivpn/obfsproxy/
+          mkdir -p ivpn/v2ray
+          cp desktop-app/daemon/References/Linux/_deps/v2ray_inst/v2ray ivpn/v2ray/
+          mkdir -p ivpn/wireguard-tools
+          cp desktop-app/daemon/References/Linux/_deps/wireguard-tools_inst/wg ivpn/wireguard-tools/
+          cp desktop-app/daemon/References/Linux/_deps/wireguard-tools_inst/wg-quick ivpn/wireguard-tools/
+
+          cp desktop-app/daemon/References/Linux/scripts/_out_bin/ivpn-service ivpn/
+          cp desktop-app/cli/References/Linux/_out_bin/ivpn ivpn/
+          cp desktop-app/cli/References/Linux/_out_bin/ivpn.bash-completion ivpn/
+          cp desktop-app/ui/References/Linux/ui/IVPN.desktop
+
+          mkdir -p ivpn/ui/bin
+          cp -r desktop-app/ui/dist/linux-unpacked/* ivpn/ui/bin/
+          cp desktop-app/References/Linux/ui/ivpnicon.svg ivpn/ui/
+          
+          # tar everything up
+          tar -cjf ivpn.tar.bz2 ivpn
+
+      - name: Process artifacts
+        run: |
+          mkdir -p buildoutput
+          mv cli/References/Linux/_out_bin/* buildoutput/
+          mv ui/References/Linux/_out_bin/* buildoutput/
+  
+          cd buildoutput
+          find . -name "ivpn*" | xargs -I {} tar czvf {}.tar.gz {}
+          sha256sum *.tar.gz > sha256sums.txt
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        id: artifact-upload
+        with:
+          path: ivpn.tar.bz2, buildoutput/*.tar.gz, buildoutput/sha256sums.txt

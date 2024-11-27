@@ -1,0 +1,3 @@
+[submodule "desktop-app"]
+	path = desktop-app
+	url = https://github.com/ivpn/desktop-app
