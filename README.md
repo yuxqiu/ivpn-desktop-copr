@@ -1,3 +1,7 @@
+Forked from [ArchitektApx/ivpn-desktop-copr](https://github.com/ArchitektApx/ivpn-desktop-copr) to manage updates by myself. To install the latest update, download it from the [Release](https://github.com/yuxqiu/ivpn-desktop-copr/releases) page and install it using your package manager. If you prefer to install it via Copr, follow the original repository for updates. Below is the original README.
+
+---
+
 # IVPN CLI & IVPN UI for aarch64
 
 [![⚡️ Powered By: Copr](https://img.shields.io/badge/⚡️_Powered_by-COPR-blue?style=flat-square)](https://copr.fedorainfracloud.org/)
