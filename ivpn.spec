@@ -1,7 +1,7 @@
 %global         debug_package %{nil}
 
 Name:           ivpn
-Version:            3.14.29
+Version:            3.14.34
 Release:        1%{?dist}
 Summary:        IVPN - Secure VPN for Privacy (CLI)
 
@@ -109,5 +109,8 @@ fi
 %attr(-, root, root) %{_sysconfdir}/opt/%{name}/%{name}.install
 
 %changelog
+* Sat Aug 02 2025 ArchitektApx <architektapx@gehinors.ch> - 3.14.34
+- Update to upstream release v3.14.34 from https://github.com/ivpn/desktop-app/releases/tag/v3.14.34
+
 * Wed Nov 27 2024 ArchitektApx <architektapx@gehinors.ch> - 3.14.29
 - Update to upstream release v3.14.29 from https://github.com/ivpn/desktop-app/releases/tag/v3.14.29
