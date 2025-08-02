@@ -46,7 +46,7 @@ jobs:
           echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
 
   build-linux:
-    runs-on: buildjet-8vcpu-ubuntu-2204-arm
+    runs-on: ubuntu-24.04-arm
     needs: [sync-upstream]
     if: needs.sync-upstream.outputs.needs_update == 'true'
     permissions:
@@ -60,7 +60,7 @@ jobs:
     steps:
       - name : Checkout
         uses: actions/checkout@v4
-        with: 
+        with:
           submodules: recursive
 
       - name: Setup git bot
@@ -85,7 +85,7 @@ jobs:
           cache-dependency-path: |
             **/go.mod
             **/go.sum
-  
+
       - name: Setup Node.js
         uses: buildjet/setup-node@v4
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: Build CLI
         env:
           IVPN_BUILD_SKIP_GLIBC_VER_CHECK: "1"
-        run: | 
+        run: |
           cd desktop-app/cli/References/Linux
           # flush GITHUB_ACTIONS to bypass checks in build.sh
           GITHUB_ACTIONS= ./build.sh -v $(cat ../../../ui/package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g')
@@ -120,11 +120,11 @@ jobs:
           cd desktop-app/ui/References/Linux
           # flush GITHUB_ACTIONS to bypass checks in build.sh
           GITHUB_ACTIONS= ./build.sh -v $(cat ../../package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g')
-    
-      - name: Package for release 
-        run: | 
+
+      - name: Package for release
+        run: |
           # CLI & Daemon
-      
+
           mkdir -p ivpn
           mkdir -p ivpn/etc
           cp desktop-app/daemon/References/Linux/etc/client.down ivpn/etc/
@@ -158,7 +158,7 @@ jobs:
           cp -r desktop-app/ui/dist/bin/* ivpn/ui/bin/
           cp desktop-app/ui/References/Linux/ui/ivpnicon.svg ivpn/ui/
           cp desktop-app/ui/References/Linux/ui/IVPN.desktop ivpn/ui/
-          
+
           # tar everything up
           tar -cjf ivpn.tar.gz ivpn
           mkdir -p buildoutput
@@ -175,9 +175,9 @@ jobs:
         id: artifact-upload
         with:
           path: buildoutput/*
-      
+
       - name: Update ivpn/ivpn-ui spec file
-        run: | 
+        run: |
           sed -i '0,/Version:.*/s//Version:            '$IVPN_VER_SPEC'/' ivpn.spec
           sed -i '0,/Version:.*/s//Version:            '$IVPN_VER_SPEC'/' ivpn-ui.spec
 
@@ -228,11 +228,11 @@ jobs:
 
       - name: Publish Release
         uses: ncipollo/release-action@v1.14.0
-        with: 
+        with:
           artifacts: artifact/*
           tag: ${{ needs.sync-upstream.outputs.IVPN_VER }}
           commit: ${{ needs.build-linux.outputs.commit-id }}
           token: ${{ secrets.GITHUB_TOKEN }}
           bodyFile: ${{ github.workspace }}/release-notes.md
           makeLatest: true
-          skipIfReleaseExists: true          
+          skipIfReleaseExists: true
